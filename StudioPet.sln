@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{17E65AC3-8E4E-42B9-86FD-16FCBB14EBA0}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudioPet", "StudioPet\StudioPet.csproj", "{2EC2B216-F69F-48E7-8717-6C21E263ECCB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2EC2B216-F69F-48E7-8717-6C21E263ECCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EC2B216-F69F-48E7-8717-6C21E263ECCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EC2B216-F69F-48E7-8717-6C21E263ECCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EC2B216-F69F-48E7-8717-6C21E263ECCB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41F65E00-4276-479D-8C48-AFF6ADD80464}
+	EndGlobalSection
+EndGlobal

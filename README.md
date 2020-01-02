@@ -1,2 +1,4 @@
 # studio-pet
-Have some company of your virtual pet while working in the Visual Studio text editor
+Be accompanied by a virtual pet while working in the Visual Studio text editor.
+
+Inspired by https://github.com/jz5/PronamaChanIde2019
