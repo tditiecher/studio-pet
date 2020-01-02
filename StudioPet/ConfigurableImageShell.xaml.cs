@@ -1,23 +1,20 @@
-﻿#pragma warning disable VSTHRD100 // Avoid async void methods
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace StudioPet
 {
-    public partial class ConfigurableImageShell : IImageShell
+    public partial class ConfigurableImageShell : IImageShell, IDisposable
     {
         public ImageShellConfiguration Configuration { get; }
 
-        private readonly DispatcherTimer _emotionTimer;
+        private readonly DispatcherTimer _emotionTimer = new DispatcherTimer();
         private readonly Random _random = new Random();
-        private readonly Dictionary<Emotion, BitmapImage> _images = new Dictionary<Emotion, BitmapImage>();
+        private readonly Dictionary<Emotion, List<BitmapImage>> _images = new Dictionary<Emotion, List<BitmapImage>>();
 
-        private Action ExpressEmotionAfterBlinking;
+        private Action _expressEmotionAfterAnimation;
 
         public ConfigurableImageShell(ImageShellConfiguration configuration)
         {
@@ -29,102 +26,67 @@ namespace StudioPet
             Width = Configuration.Width;
             Height = Configuration.Height;
 
-            _images.Add(Emotion.Normal, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Normal.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Blink1, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Blink1.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Blink2, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Blink2.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Happy, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Happy.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Happy1, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Happy1.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Happy2, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Happy2.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Sad, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Sad.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Sad1, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Sad1.png"), UriKind.Absolute)));
-            _images.Add(Emotion.Sad2, new BitmapImage(new Uri(Path.Combine(configuration.StudioPetFolder, "Sad2.png"), UriKind.Absolute)));
+            foreach (Emotion emotion in Enum.GetValues(typeof(Emotion)))
+            {
+                _images.Add(emotion, new List<BitmapImage>());
 
-            TheImage.Source = _images[Emotion.Normal];
+                foreach (var file in new DirectoryInfo(configuration.ImageFolder).GetFiles($"{emotion}*.png"))
+                {
+                    _images[emotion].Add(new BitmapImage(new Uri(file.FullName, UriKind.Absolute)));
+                }
+                
+            }
 
-            _emotionTimer = new DispatcherTimer();
             _emotionTimer.Tick += EmotionTimer_Tick;
 
-            RestartTimer();
-        }
-
-        private void RestartTimer()
-        {
-            _emotionTimer.Interval = TimeSpan.FromSeconds(_random.Next(2, 30));
+            TheImage.Source = _images[Emotion.Normal][_random.Next(_images[Emotion.Normal].Count)];
+            _emotionTimer.Interval = GetRandomTimeSpan(Emotion.Normal);
+            
             _emotionTimer.Start();
         }
 
-        private void StopTimer()
+        
+        public void Dispose()
         {
-            _emotionTimer.Stop();
+            _emotionTimer.Tick -= EmotionTimer_Tick;
         }
 
 
-        private async void EmotionTimer_Tick(object sender, EventArgs e)
+        private void EmotionTimer_Tick(object sender, EventArgs e)
         {
-            await ExpressEmotionAsync();
+            ExpressEmotion(Emotion.Normal);
         }
 
-        public async void ExpressEmotion(Emotion emotion)
+        public void ExpressEmotion(Emotion emotion)
         {
-            // While blinking, execute again after blinking is completed
-            if (!_emotionTimer.IsEnabled) // blinking
-            {                
-                ExpressEmotionAfterBlinking = () => ExpressEmotion(emotion);
+            if (!_emotionTimer.IsEnabled)
+            {
+                _expressEmotionAfterAnimation = () => ExpressEmotion(emotion);
                 return;
             }
 
-            ExpressEmotionAfterBlinking = null;
+            _expressEmotionAfterAnimation = null;
 
-            StopTimer();
+            _emotionTimer.Stop();
 
+            TheImage.Source = _images[emotion][_random.Next(_images[emotion].Count)];
+            _emotionTimer.Interval = GetRandomTimeSpan(emotion);
+
+            _expressEmotionAfterAnimation?.Invoke();
+            _emotionTimer.Start();
+        }
+
+        private TimeSpan GetRandomTimeSpan(Emotion emotion)
+        {
             switch (emotion)
             {
                 case Emotion.Happy:
-                    await ShowEmotionAsync(new[] {Emotion.Happy, Emotion.Happy1, Emotion.Happy2}, 100);
-                    break;
+                    return TimeSpan.FromSeconds(_random.Next(Configuration.ShowHappyMinSeconds, Configuration.ShowHappyMaxSeconds));
                 case Emotion.Sad:
-                    await ShowEmotionAsync(new[] {Emotion.Sad, Emotion.Sad1, Emotion.Sad2}, 100);
-                    break;
-            }
-
-            RestartTimer();
-        }
-        
-        public async Task ExpressEmotionAsync()
-        {
-            StopTimer();
-            var blinked = false;
-
-            if (_random.Next(0, 10) < 8)
-            {
-                // Blink
-                blinked = true;
-                await ShowEmotionAsync(new[] {Emotion.Blink1, Emotion.Blink2}, 100);
-            }
-            else
-            {
-                TheImage.Source = _images[Emotion.Normal];
-            }
-
-            RestartTimer();
-
-            if (blinked)
-            {
-                ExpressEmotionAfterBlinking?.Invoke();
+                    return TimeSpan.FromSeconds(_random.Next(Configuration.ShowSadMinSeconds, Configuration.ShowSadMaxSeconds));
+                default:
+                    return TimeSpan.FromSeconds(_random.Next(Configuration.ShowNormalMinSeconds, Configuration.ShowNormalMaxSeconds));
             }
         }
-
-        private async Task ShowEmotionAsync(IEnumerable<Emotion> emotions, double delayInMs)
-        {
-            foreach (var emotion in emotions)
-            {
-                await Task
-                    .Delay(TimeSpan.FromMilliseconds(delayInMs))
-                    .ContinueWith(_ => TheImage.Source = _images[emotion], TaskScheduler.FromCurrentSynchronizationContext());
-            }
-        }
-
     }
 }
-
-#pragma warning restore VSTHRD100 // Avoid async void methods

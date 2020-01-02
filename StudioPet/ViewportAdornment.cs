@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Text.Editor;
@@ -85,47 +86,57 @@ namespace StudioPet
 
         private static ImageShellConfiguration LoadConfiguration()
         {
-            ImageShellConfiguration configuration = null;
+            var configuration = new ImageShellConfiguration();
 
-            var studioPetPath = Environment.GetEnvironmentVariable("StudioPet", EnvironmentVariableTarget.User);
-            if (!string.IsNullOrEmpty(studioPetPath) && Directory.Exists(studioPetPath))
+            var studioPetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StudioPet");
+            var configFile = Path.Combine(studioPetPath, "studiopet.config");
+
+            if (!Directory.Exists(studioPetPath))
             {
-                var configFile = Path.Combine(studioPetPath, "studiopet.config");
-                if (File.Exists(configFile))
+                Directory.CreateDirectory(studioPetPath);
+                using (var file = File.CreateText(configFile))
                 {
-                    try
-                    {
-                        var serializer = new JsonSerializer();
-                        serializer.Converters.Add(new StringEnumConverter());
+                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
+                    serializer.Converters.Add(new StringEnumConverter());
+                    serializer.Serialize(file, configuration);
+                }
 
-                        using (var file = File.OpenText(configFile))
-                        {
-                            using (var reader = new JsonTextReader(file))
-                            {
-                                configuration = serializer.Deserialize<ImageShellConfiguration>(reader);
-                                configuration.StudioPetFolder = studioPetPath;
-                            }
-                        }
-                    }
-                    catch (Exception err)
+
+                var extensionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                if (extensionPath != null)
+                {
+                    foreach (var imageFile in new DirectoryInfo(Path.Combine(extensionPath, "Images")).GetFiles("*.png"))
                     {
-                        var errorLog = $"{DateTime.Now:dd-MM-yyyy HH:mm:ss}{Environment.NewLine}{err.GetType()}: {err.Message}{Environment.NewLine}{err.StackTrace}";
-                        File.WriteAllText(Path.Combine(studioPetPath, "error.log"), errorLog);
+                        File.Copy(imageFile.FullName, Path.Combine(studioPetPath, imageFile.Name));
                     }
                 }
             }
 
-            return configuration ?? new ImageShellConfiguration();
+            if (File.Exists(configFile))
+            {
+                try
+                {
+                    var serializer = new JsonSerializer();
+                    serializer.Converters.Add(new StringEnumConverter());
 
-            //using (var file = File.CreateText(Path.Combine(greenStudioFolder, "studiopet.config")))
-            //{
-            //    var serializer = new JsonSerializer
-            //    {
-            //        Formatting = Formatting.Indented
-            //    };
-            //    serializer.Converters.Add(new StringEnumConverter());
-            //    serializer.Serialize(file, configuration);
-            //}
+                    using (var file = File.OpenText(configFile))
+                    {
+                        using (var reader = new JsonTextReader(file))
+                        {
+                            configuration = serializer.Deserialize<ImageShellConfiguration>(reader);
+                        }
+                    }
+                }
+                catch (Exception err)
+                {
+                    var errorLog =
+                        $"{DateTime.Now:dd-MM-yyyy HH:mm:ss}{Environment.NewLine}{err.GetType()}: {err.Message}{Environment.NewLine}{err.StackTrace}";
+                    File.WriteAllText(Path.Combine(studioPetPath, "error.log"), errorLog);
+                }
+            }
+
+            configuration.ImageFolder = studioPetPath;
+            return configuration;
         }
     }
 }

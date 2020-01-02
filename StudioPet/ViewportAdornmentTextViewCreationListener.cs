@@ -5,6 +5,7 @@ using System.ComponentModel.Composition;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Threading;
 using Microsoft.VisualStudio.Utilities;
 
 namespace StudioPet

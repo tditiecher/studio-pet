@@ -1,4 +1,6 @@
-﻿namespace StudioPet
+﻿using System.Threading.Tasks;
+
+namespace StudioPet
 {
     public interface IImageShell
     {
