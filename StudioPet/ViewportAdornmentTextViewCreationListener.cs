@@ -5,7 +5,6 @@ using System.ComponentModel.Composition;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Threading;
 using Microsoft.VisualStudio.Utilities;
 
 namespace StudioPet
@@ -17,15 +16,15 @@ namespace StudioPet
     {
         [Import]
         public SVsServiceProvider ServiceProvider { get; set; }
-        
+
         [Export(typeof(AdornmentLayerDefinition))]
         [Name(ViewportAdornment.Name)]
         [Order(Before = PredefinedAdornmentLayers.Caret)]
         // ReSharper disable once UnassignedField.Local
         private AdornmentLayerDefinition _editorAdornmentLayer;
-        
+
         private ViewportAdornment _adornment;
-        
+
         // ReSharper disable once NotAccessedField.Local
         private BuildEvents _buildEvents;
 
@@ -44,7 +43,13 @@ namespace StudioPet
 
         private void BuildEvents_OnBuildProjConfigDone(string project, string projectConfig, string platform, string solutionConfig, bool success)
         {
-            _adornment?.Shell.ExpressEmotion(success ? Emotion.Happy : Emotion.Sad);
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if (ServiceProvider.GetService(typeof(DTE)) is DTE dte)
+            {
+                var hasErrors = !success || dte.Solution.SolutionBuild.LastBuildInfo > 0;
+                _adornment?.Shell.ExpressEmotion(hasErrors ? Emotion.Sad : Emotion.Happy);
+            }
         }
     }
 }

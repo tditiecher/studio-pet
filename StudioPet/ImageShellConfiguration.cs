@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Newtonsoft.Json;
 
 namespace StudioPet
 {
@@ -18,6 +19,7 @@ namespace StudioPet
         public int ShowNormalMinSeconds { get; set; } = 15;
         public int ShowNormalMaxSeconds { get; set; } = 60;
 
+        [JsonIgnore]
         public string ImageFolder { get; set; }
     }
 }
