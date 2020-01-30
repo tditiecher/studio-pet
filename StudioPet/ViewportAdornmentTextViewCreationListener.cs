@@ -2,6 +2,7 @@
 #pragma warning disable 649, 169
 
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
@@ -28,6 +29,9 @@ namespace StudioPet
         // ReSharper disable once NotAccessedField.Local
         private BuildEvents _buildEvents;
 
+        private bool? _buildSucceeded;
+
+
         public void TextViewCreated(IWpfTextView textView)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -37,19 +41,36 @@ namespace StudioPet
             if (ServiceProvider.GetService(typeof(DTE)) is DTE dte)
             {
                 _buildEvents = dte.Events.BuildEvents;
+                dte.Events.BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+                dte.Events.BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
                 dte.Events.BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
+            }
+        }
+
+        private void BuildEvents_OnBuildBegin(vsBuildScope scope, vsBuildAction action)
+        {
+            Debug.WriteLine($"StudioPet: OnBuildBegin scope:{scope} action:{action}");
+            
+            _buildSucceeded = null;
+        }
+
+        private void BuildEvents_OnBuildDone(vsBuildScope scope, vsBuildAction action)
+        {
+            Debug.WriteLine($"StudioPet: OnBuildDone scope:{scope} action:{action} buildSucceeded:{_buildSucceeded}.");
+
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if (_buildSucceeded.HasValue)
+            {
+                _adornment?.Shell.ExpressEmotion(_buildSucceeded.Value ? Emotion.Happy : Emotion.Sad);
             }
         }
 
         private void BuildEvents_OnBuildProjConfigDone(string project, string projectConfig, string platform, string solutionConfig, bool success)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
+            Debug.WriteLine($"StudioPet: OnBuildProjConfigDone project:{project} success:{success}");
 
-            if (ServiceProvider.GetService(typeof(DTE)) is DTE dte)
-            {
-                var hasErrors = !success || dte.Solution.SolutionBuild.LastBuildInfo > 0;
-                _adornment?.Shell.ExpressEmotion(hasErrors ? Emotion.Sad : Emotion.Happy);
-            }
+            _buildSucceeded = success && (_buildSucceeded ?? true);
         }
     }
 }
