@@ -19,6 +19,8 @@ namespace StudioPet
         public int ShowNormalMinSeconds { get; set; } = 15;
         public int ShowNormalMaxSeconds { get; set; } = 60;
 
+        public string PictureSet { get; set; } = "Default";
+
         [JsonIgnore]
         public string ImageFolder { get; set; }
     }

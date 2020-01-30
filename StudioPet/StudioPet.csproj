@@ -85,33 +85,40 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Images\Happy.png">
+    <Content Include="PictureSets\Default\Happy.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
-    <Content Include="Images\Happy1.png">
+    <Content Include="PictureSets\Default\Happy1.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
-    <Content Include="Images\Normal.png">
+    <Content Include="PictureSets\Default\Normal.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
-    <Content Include="Images\Normal1.png">
+    <Content Include="PictureSets\Default\Normal1.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
-    <Content Include="Images\Normal2.png">
+    <Content Include="PictureSets\Default\Normal2.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
-    <Content Include="Images\Sad.png">
+    <Content Include="PictureSets\Default\Sad.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
-    <Content Include="Images\Sad1.png">
+    <Content Include="PictureSets\Default\Sad1.png">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <VSIXSubPath>PictureSets\Default</VSIXSubPath>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

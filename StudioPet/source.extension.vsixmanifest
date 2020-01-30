@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="StudioPet.b1903b00-8fee-4279-9aca-9e5b55c10e8b" Version="1.1" Language="en-US" Publisher="Taco Ditiecher" />
+        <Identity Id="StudioPet.b1903b00-8fee-4279-9aca-9e5b55c10e8b" Version="1.2" Language="en-US" Publisher="Taco Ditiecher" />
         <DisplayName>StudioPet</DisplayName>
         <Description xml:space="preserve">Be accompanied by a virtual pet while working in the Visual Studio text editor.
 </Description>

@@ -105,9 +105,14 @@ namespace StudioPet
                 var extensionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 if (extensionPath != null)
                 {
-                    foreach (var imageFile in new DirectoryInfo(Path.Combine(extensionPath, "Images")).GetFiles("*.png"))
+                    foreach (var imageFile in new DirectoryInfo(Path.Combine(extensionPath, "PictureSets")).GetFiles("*.*", SearchOption.AllDirectories))
                     {
-                        File.Copy(imageFile.FullName, Path.Combine(studioPetPath, imageFile.Name));
+                        var destFile = new FileInfo(imageFile.FullName.Replace(extensionPath, studioPetPath));
+                        if (destFile.Directory != null && !destFile.Directory.Exists)
+                        {
+                            destFile.Directory.Create();
+                        }
+                        File.Copy(imageFile.FullName, destFile.FullName);
                     }
                 }
             }
@@ -135,7 +140,7 @@ namespace StudioPet
                 }
             }
 
-            configuration.ImageFolder = studioPetPath;
+            configuration.ImageFolder = Path.Combine(studioPetPath, "PictureSets", configuration.PictureSet);
             return configuration;
         }
     }

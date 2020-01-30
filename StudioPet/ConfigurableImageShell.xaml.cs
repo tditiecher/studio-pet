@@ -30,11 +30,10 @@ namespace StudioPet
             {
                 _images.Add(emotion, new List<BitmapImage>());
 
-                foreach (var file in new DirectoryInfo(configuration.ImageFolder).GetFiles($"{emotion}*.png"))
+                foreach (var file in new DirectoryInfo(configuration.ImageFolder).GetFiles($"{emotion}*.*"))
                 {
                     _images[emotion].Add(new BitmapImage(new Uri(file.FullName, UriKind.Absolute)));
                 }
-                
             }
 
             _emotionTimer.Tick += EmotionTimer_Tick;
